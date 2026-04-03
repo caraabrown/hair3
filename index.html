@@ -331,9 +331,13 @@ h3 {
 .photo-prompt .ico{font-size:28px;display:block;margin-bottom:8px;opacity:0.4;}
 
 /* -- MODAL -- */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9998;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);}
 .modal.open{display:flex;}
 .modal-box{background:var(--surface);border:none;border-radius:var(--r);padding:36px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.7);position:relative;}
+/* Hide sticky header/nav when modal is open so they don't bleed over */
+body.modal-open .header,
+body.modal-open .nav,
+body.modal-open .hero-strip { visibility: hidden; }
 .modal-x{position:absolute;top:16px;right:16px;width:32px;height:32px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:color .15s;}
 .modal-x:hover{color:var(--accent);}
 .modal-title{font-family:var(--font-head);font-size:24px;font-weight:700;margin-bottom:6px;}
@@ -2865,11 +2869,16 @@ function toggleAcc(item) { item.classList.toggle('open'); }
 
 // ── Modals
 function openM(id) {
+  document.body.classList.add('modal-open');
+  if(id==='m-edit-all') renderEditAllGrid();
   document.getElementById(id).classList.add('open');
   if (id==='m-settings') { document.getElementById('s-date').value = ST.start||''; document.getElementById('s-wash').value = ST.washDay; document.getElementById('s-style').value = ST.style; document.getElementById('s-apikey').value = ST.apiKey; }
   if (id==='m-log') document.getElementById('l-date').value = new Date().toISOString().split('T')[0];
 }
-function closeM(id) { document.getElementById(id).classList.remove('open'); }
+function closeM(id) {
+  document.getElementById(id).classList.remove('open');
+  if(!document.querySelector('.modal.open')) document.body.classList.remove('modal-open');
+}
 document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
 
 // ── Settings
@@ -3317,20 +3326,38 @@ function openEditAll() {
 }
 
 function renderEditAllGrid() {
-  const el = document.getElementById('edit-all-grid');
-  if(!el) return;
-  const prods = getAllProds();
-  const cats = ['Natural','Professional','Commercial','Supplement','DIY'];
-  el.innerHTML = prods.map((p,i) => `
-    <div style="display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);" data-idx="${i}">
-      <input class="finp" style="padding:6px 8px;font-size:13px;" value="${p.name.replace(/"/g,'&quot;')}" data-field="name" data-orig="${encodeURIComponent(p.name)}" placeholder="Product name">
-      <select class="fsel" style="padding:6px 8px;font-size:12px;" data-field="cat" data-orig="${encodeURIComponent(p.name)}">
-        ${cats.map(ct => `<option value="${ct}" ${p.cat===ct?'selected':''}>${ct}</option>`).join('')}
-      </select>
-      <input class="finp" style="padding:6px 8px;font-size:12px;color:var(--text3);" value="${(p.use||'').replace(/"/g,'&quot;')}" data-field="use" data-orig="${encodeURIComponent(p.name)}" placeholder="Use / step">
-      <button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;" onclick="removeFromEditList(this)" title="Hide this product">&#10005;</button>
-    </div>
-  `).join('');
+  var el = document.getElementById('edit-all-grid');
+  if(!el) { console.log('edit-all-grid not found'); return; }
+  el.innerHTML = '<div style="padding:20px;color:var(--text3);text-align:center;">Loading...</div>';
+  // Defer so modal is visible first
+  setTimeout(function() {
+    var prods = [];
+    try { prods = getAllProds(); } catch(e) { console.log('getAllProds error:', e); }
+    console.log('renderEditAllGrid: prods count =', prods.length);
+    if(!prods.length) {
+      el.innerHTML = '<div style="padding:20px;color:var(--text3);">No products loaded. Try refreshing.</div>';
+      return;
+    }
+    var cats = ['Natural','Professional','Commercial','Supplement','DIY'];
+    var html = '';
+    for(var i = 0; i < prods.length; i++) {
+      var p = prods[i];
+      var enc = encodeURIComponent(p.name || '');
+      var safeName = (p.name || '').replace(/"/g, '&quot;');
+      var safeUse = (p.use || '').replace(/"/g, '&quot;');
+      var opts = '';
+      for(var j = 0; j < cats.length; j++) {
+        opts += '<option value="' + cats[j] + '"' + (p.cat === cats[j] ? ' selected' : '') + '>' + cats[j] + '</option>';
+      }
+      html += '<div style="display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);" data-idx="' + i + '">' +
+        '<input class="finp" style="padding:6px 8px;font-size:13px;" value="' + safeName + '" data-field="name" data-orig="' + enc + '" placeholder="Product name">' +
+        '<select class="fsel" style="padding:6px 8px;font-size:12px;background:var(--surface2);" data-field="cat" data-orig="' + enc + '">' + opts + '</select>' +
+        '<input class="finp" style="padding:6px 8px;font-size:12px;color:var(--text3);" value="' + safeUse + '" data-field="use" data-orig="' + enc + '" placeholder="Use / step">' +
+        '<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 6px;" onclick="removeFromEditList(this)" title="Hide">&#10005;</button>' +
+        '</div>';
+    }
+    el.innerHTML = html;
+  }, 50);
 }
 
 function removeFromEditList(btn) {
