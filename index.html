@@ -2630,7 +2630,8 @@ em, i { font-style: italic; }
           <option value="washday_heat">Wash Day + Heat Style</option>
           <option value="cowash">Co-Wash Day</option>
           <option value="heatstyle">Heat Styling Only</option>
-          <option value="naturalsty">Natural Styling Only</option>
+          <option value="naturalsty">Natural Styling</option>
+          <option value="maintenance">Maintenance</option>
           <option value="treatment">Treatment (No Wash)</option>
           <option value="scalpcare">Scalp Care</option>
           <option value="other">Other</option>
@@ -4362,43 +4363,54 @@ async function getDashInsights() {
 // ══════════════════════════════════════════════════════════════
 const SESSION_STEPS = {
   washday: [
-    {id:'prepoo',label:'Pre-Poo',color:'var(--cat-diy)',prods:['Natural','Professional'],tools:['Wide-Tooth Comb','Finger Comb']},
-    {id:'shampoo',label:'Shampoo',color:'var(--cat-com)',prods:['shampoo'],tools:['Shower Comb','Scalp Massager']},
-    {id:'condition',label:'Condition / Deep Condition',color:'var(--cat-pro)',prods:['condition'],tools:['Hood Dryer / Heat Cap','Hooded Dryer']},
-    {id:'rinse',label:'Rinse & Cuticle Seal',color:'var(--cat-nat)',prods:['rinse'],tools:['Microfiber Towel']},
-    {id:'leavein',label:'Leave-In & LOC/LCO',color:'var(--cat-com)',prods:['leavein'],tools:['Wide-Tooth Comb','Finger Comb']},
-    {id:'style',label:'Style (Natural)',color:'var(--accent)',prods:['styling'],tools:['Diffuser','Wide-Tooth Comb','Finger Comb','Denman']},
+    {id:'prepoo',label:'Pre-Poo',color:'var(--cat-diy)',prods:['prepoo'],tools:['Wide-Tooth Comb','Finger Comb','Scalp Massager']},
+    {id:'shampoo',label:'Shampoo / Cleanse',color:'var(--cat-com)',prods:['shampoo'],tools:['Shower Comb','Scalp Massager']},
+    {id:'dc',label:'Deep Condition',color:'var(--cat-pro)',prods:['condition'],tools:['Hood Dryer / Heat Cap','Hooded Dryer','Plastic Processing Cap']},
+    {id:'rinse',label:'Rinse & Cuticle Seal',color:'var(--cat-nat)',prods:['rinse'],tools:['Microfiber Towel','Spray Bottle']},
+    {id:'leavein',label:'Leave-In / LOC',color:'var(--accent)',prods:['leavein'],tools:['Wide-Tooth Comb','Finger Comb']},
+    {id:'scalp',label:'Scalp',color:'var(--cat-pro)',prods:['scalp'],tools:['Scalp Massager']},
+    {id:'styling',label:'Styling',color:'var(--cat-diy)',prods:['styling'],tools:['Diffuser Attachment','Wide-Tooth Comb','Finger Comb','Denman Brush']},
+    {id:'finish',label:'Finishing',color:'var(--cat-com)',prods:['finish'],tools:[]},
   ],
   washday_heat: [
-    {id:'prepoo',label:'Pre-Poo',color:'var(--cat-diy)',prods:['Natural','Professional'],tools:['Wide-Tooth Comb','Finger Comb']},
-    {id:'shampoo',label:'Shampoo',color:'var(--cat-com)',prods:['shampoo'],tools:['Shower Comb','Scalp Massager']},
-    {id:'condition',label:'Condition / Deep Condition',color:'var(--cat-pro)',prods:['condition'],tools:['Hood Dryer / Heat Cap','Hooded Dryer']},
-    {id:'rinse',label:'Rinse & Cuticle Seal',color:'var(--cat-nat)',prods:['rinse'],tools:[]},
-    {id:'leavein',label:'Leave-In & LOC/LCO',color:'var(--cat-com)',prods:['leavein'],tools:['Wide-Tooth Comb']},
+    {id:'prepoo',label:'Pre-Poo',color:'var(--cat-diy)',prods:['prepoo'],tools:['Wide-Tooth Comb','Finger Comb']},
+    {id:'shampoo',label:'Shampoo / Cleanse',color:'var(--cat-com)',prods:['shampoo'],tools:['Shower Comb','Scalp Massager']},
+    {id:'dc',label:'Deep Condition',color:'var(--cat-pro)',prods:['condition'],tools:['Hood Dryer / Heat Cap','Hooded Dryer','Plastic Processing Cap']},
+    {id:'rinse',label:'Rinse & Cuticle Seal',color:'var(--cat-nat)',prods:['rinse'],tools:['Microfiber Towel']},
+    {id:'leavein',label:'Leave-In / LOC',color:'var(--accent)',prods:['leavein'],tools:['Wide-Tooth Comb']},
     {id:'blowdry',label:'Blow Dry',color:'var(--cat-ing)',prods:['blowdry'],tools:['Red Pro Titanium Turbo 3500','Wide-Tooth Comb','Rat Tail Comb','Bristle Brush']},
-    {id:'flatstyle',label:'Flat Iron / High Heat',color:'#FF6B9D',prods:['heatprotect'],tools:['Jilbre Flat Iron (Large)','Jilbre Flat Iron (Small)','Jilbre Travel Iron','Rat Tail Comb','Fine-Tooth Comb']},
+    {id:'finish',label:'Flat Iron / Heat Style',color:'#FF6B9D',prods:['heatprotect'],tools:['Jilbre Flat Iron (Large)','Jilbre Flat Iron (Small)','Jilbre Travel Iron','Rat Tail Comb','Fine-Tooth Comb']},
   ],
   cowash: [
-    {id:'cowash',label:'Co-Wash',color:'var(--cat-nat)',prods:['condition'],tools:['Shower Comb','Finger Comb']},
-    {id:'condition',label:'Condition',color:'var(--cat-pro)',prods:['condition'],tools:[]},
-    {id:'rinse',label:'Rinse & Seal',color:'var(--accent)',prods:['rinse'],tools:['Microfiber Towel']},
-    {id:'leavein',label:'Leave-In & LOC',color:'var(--cat-com)',prods:['leavein'],tools:['Finger Comb']},
-    {id:'style',label:'Style',color:'var(--cat-diy)',prods:['styling'],tools:['Wide-Tooth Comb','Finger Comb']},
+    {id:'shampoo',label:'Co-Wash',color:'var(--cat-nat)',prods:['condition'],tools:['Shower Comb','Finger Comb']},
+    {id:'dc',label:'Condition',color:'var(--cat-pro)',prods:['condition'],tools:[]},
+    {id:'rinse',label:'Rinse & Cuticle Seal',color:'var(--cat-nat)',prods:['rinse'],tools:['Microfiber Towel']},
+    {id:'leavein',label:'Leave-In / LOC',color:'var(--accent)',prods:['leavein'],tools:['Finger Comb']},
+    {id:'styling',label:'Styling',color:'var(--cat-diy)',prods:['styling'],tools:['Wide-Tooth Comb','Finger Comb','Denman Brush']},
   ],
   heatstyle: [
-    {id:'blowdry',label:'Blow Dry',color:'var(--cat-ing)',prods:['blowdry'],tools:['Red Pro Titanium Turbo 3500','Wide-Tooth Comb','Rat Tail Comb']},
-    {id:'flatstyle',label:'Flat Iron',color:'#FF6B9D',prods:['heatprotect'],tools:['Jilbre Flat Iron (Large)','Jilbre Flat Iron (Small)','Jilbre Travel Iron','Rat Tail Comb']},
+    {id:'blowdry',label:'Blow Dry',color:'var(--cat-ing)',prods:['blowdry'],tools:['Red Pro Titanium Turbo 3500','Wide-Tooth Comb','Rat Tail Comb','Bristle Brush']},
+    {id:'finish',label:'Flat Iron / Heat Style',color:'#FF6B9D',prods:['heatprotect'],tools:['Jilbre Flat Iron (Large)','Jilbre Flat Iron (Small)','Jilbre Travel Iron','Rat Tail Comb','Fine-Tooth Comb']},
   ],
   naturalsty: [
-    {id:'refresh',label:'Refresh',color:'var(--cat-nat)',prods:['refresh'],tools:['Diffuser','Finger Comb']},
-    {id:'style',label:'Style',color:'var(--accent)',prods:['styling'],tools:['Wide-Tooth Comb','Finger Comb','Denman']},
+    {id:'scalp',label:'Scalp',color:'var(--cat-pro)',prods:['scalp'],tools:['Scalp Massager']},
+    {id:'leavein',label:'Refresh / Leave-In',color:'var(--accent)',prods:['refresh'],tools:['Spray Bottle','Finger Comb']},
+    {id:'styling',label:'Natural Styling',color:'var(--cat-diy)',prods:['styling'],tools:['Wide-Tooth Comb','Finger Comb','Denman Brush','Diffuser Attachment']},
+    {id:'finish',label:'Finishing',color:'var(--cat-com)',prods:['finish'],tools:[]},
+  ],
+  maintenance: [
+    {id:'scalp',label:'Scalp Care',color:'var(--cat-pro)',prods:['scalp'],tools:['Scalp Massager','Spray Bottle']},
+    {id:'leavein',label:'Moisture / Refresh',color:'var(--accent)',prods:['refresh'],tools:['Spray Bottle','Finger Comb']},
+    {id:'styling',label:'Style Touch-Up',color:'var(--cat-diy)',prods:['styling'],tools:['Wide-Tooth Comb','Finger Comb','Rat Tail Comb','Scissors']},
+    {id:'finish',label:'Finishing',color:'var(--cat-com)',prods:['finish'],tools:['Satin Bonnet','Satin Pillowcase']},
+    {id:'keratin',label:'Keratin Treatment',color:'#FF6B9D',prods:['keratin'],tools:['Rat Tail Comb','Fine-Tooth Comb','Jilbre Flat Iron (Large)']},
   ],
   treatment: [
-    {id:'condition',label:'Deep Condition',color:'var(--cat-pro)',prods:['condition'],tools:['Hood Dryer / Heat Cap']},
-    {id:'rinse',label:'Rinse & Seal',color:'var(--cat-nat)',prods:['rinse'],tools:[]},
+    {id:'dc',label:'Deep Condition',color:'var(--cat-pro)',prods:['condition'],tools:['Hood Dryer / Heat Cap','Plastic Processing Cap']},
+    {id:'rinse',label:'Rinse & Seal',color:'var(--cat-nat)',prods:['rinse'],tools:['Microfiber Towel']},
   ],
   scalpcare: [
-    {id:'scalp',label:'Scalp Treatment',color:'var(--cat-nat)',prods:['scalp'],tools:['Scalp Massager']},
+    {id:'scalp',label:'Scalp Treatment',color:'var(--cat-pro)',prods:['scalp'],tools:['Scalp Massager','Spray Bottle']},
   ],
   other: [
     {id:'other',label:'Session',color:'var(--accent)',prods:['all'],tools:[]},
@@ -4406,6 +4418,9 @@ const SESSION_STEPS = {
 };
 
 const PROD_BY_STEP = {
+  prepoo: ['Chebe Penetrating Overnight Butter (DIY)','Bhringraj-Brahmi Scalp Growth Oil (DIY)','JBCO (Jamaican Black Castor Oil)','NOW Almond Oil','Hollywood Beauty Biotin Oil','Avocado Oil','Coconut Oil','Sesame Oil','Vitamin E Oil','Chebe Powder','Bhringraj Powder'],
+  keratin: ['GK Keratin Treatment'],
+  finish: ['Oribe Impermeable Anti-Humidity Spray','Bio Silk Silk Therapy','Amika Glass Action Elixir','Keracare Silken Seal Liquid Sheen','Olaplex No. 9 Bond Protector','Farm & Table Frizz Free Smoothing Oil','AllDay Edges','Satin Bonnet'],
   shampoo: ['Design Essentials Oat Protein & Henna Shampoo','Chi Infra Shampoo','Oribe Gold Lust Repair Shampoo','Nizoral Anti-Dandruff Shampoo','Natural Black Soap','Shikakai-Amla Clarifying Rinse (DIY)'],
   condition: ['Oribe Gold Lust Transformative Mask','ORS Olive Oil Replenishing Conditioner','ORS Banana Bamboo Conditioner','Matrix Food for Soft Conditioner','Mizani Fiberfyl Strengthening Fix','CER-100 Collagen Ceramide Treatment','Aphogee Protein Treatment','Aphogee Two-Minute Reconstructor','Collagen-Jojoba Protein Blend (DIY)','Hibiscus Moisture Bomb DC (DIY)','Triple Protein Intensive Mask (DIY)'],
   rinse: ['ACV (Apple Cider Vinegar)','Green Tea + ACV Final Rinse (DIY)','Aloe Vera'],
@@ -4428,7 +4443,7 @@ const TAG_GROUPS = [
   {group:'HEAT', tags:['Reversion','No Reversion','Smooth','Frizz Resistant','Overprocessed']},
 ];
 
-const ALL_TOOLS = [
+const ALL_TOOLS = ['Scissors',
   'Scalp Massager','Microfiber Towel','Wide-Tooth Comb','Shower Comb','Rat Tail Comb',
   'Fine-Tooth Comb','Finger Comb','Denman Brush','Bristle Brush',
   'Hood Dryer / Heat Cap','Hooded Dryer','Diffuser Attachment',
@@ -4641,7 +4656,7 @@ function renderDiary() {
   
   if(!logs.length) { el.innerHTML = '<div class="text3 sz13" style="text-align:center;padding:40px;">No sessions found. Log your first session using the + button.</div>'; return; }
   
-  const TYPE_LABELS = {washday:'Wash Day',washday_heat:'Wash Day + Heat',cowash:'Co-Wash',heatstyle:'Heat Style',naturalsty:'Natural Style',treatment:'Treatment',scalpcare:'Scalp Care',other:'Session'};
+  const TYPE_LABELS = {washday:'Wash Day',washday_heat:'Wash Day + Heat',cowash:'Co-Wash',heatstyle:'Heat Style',naturalsty:'Natural Style',maintenance:'Maintenance',treatment:'Treatment',scalpcare:'Scalp Care',other:'Session'};
   
   el.innerHTML = logs.map(l => {
     const allTags = l.tags || (l.steps||[]).flatMap(s=>s.tags||[]);
