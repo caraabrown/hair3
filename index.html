@@ -110,13 +110,35 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .photo-note{font-size:11px;color:var(--muted);line-height:1.4;}
 .photo-delete{position:absolute;top:7px;right:7px;background:rgba(8,10,15,0.75);border:none;border-radius:50%;width:26px;height:26px;color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
 .photo-delete:hover{color:var(--rose);}
-.week-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
-.week-row{display:grid;grid-template-columns:46px 1fr 1fr;gap:10px;align-items:center;padding:12px 15px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid var(--border);}
-.week-row.today{background:rgba(0,181,160,0.06);border-color:rgba(0,181,160,0.2);}
-.week-day{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--muted);}
-.week-row.today .week-day{color:var(--teal);}
-.week-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);}
-.week-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+/* ── WEEK GRID (hair protocol style) ── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-bottom:20px;overflow-x:auto;}
+.day-col{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 9px;min-height:160px;}
+.day-col.today{border-color:var(--teal);box-shadow:0 0 12px rgba(0,181,160,0.12);}
+.day-head{font-family:'Urbanist',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);}
+.day-col.today .day-head{color:var(--teal);}
+.day-date{font-size:14px;font-weight:300;color:var(--dim);}
+.today-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+.mini-tasks{display:flex;flex-direction:column;gap:3px;}
+.mt{display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:5px;background:rgba(255,255,255,0.03);font-size:10px;font-weight:500;color:var(--muted);line-height:1.3;}
+.mt-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.mt-bha{background:rgba(194,69,106,0.1);}
+.mt-bha .mt-dot{background:var(--rose);}
+.mt-am{background:rgba(212,144,10,0.08);}
+.mt-am .mt-dot{background:var(--amber);}
+.mt-fungal{background:rgba(160,127,212,0.1);}
+.mt-fungal .mt-dot{background:var(--violet);}
+/* ── CAL BUTTONS ── */
+.cal-section{margin-bottom:20px;}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.cal-title-block{}
+.cal-week-label{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;line-height:1;color:var(--text);}
+.cal-range{font-size:12px;color:var(--muted);margin-top:3px;}
+.cal-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.cal-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-family:'Urbanist',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none;}
+.cal-btn-google{background:rgba(0,181,160,0.12);border:1px solid rgba(0,181,160,0.3);color:var(--teal);}
+.cal-btn-google:hover{background:rgba(0,181,160,0.22);}
+.cal-btn-ics{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);}
+.cal-btn-ics:hover{color:var(--text);border-color:rgba(255,255,255,0.2);}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;}
 .chart-title{font-family:'Urbanist',sans-serif;font-weight:800;font-size:14px;color:var(--text);margin-bottom:3px;}
 .chart-sub{font-size:11px;color:var(--muted);margin-bottom:16px;}
@@ -265,7 +287,18 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 <!-- SCHEDULE -->
 <div class="panel" id="panel-schedule">
-  <div class="section-label"><div class="dot dot-teal"></div><span class="section-title c-teal">Weekly Routine Map</span></div>
+  <div class="cal-section">
+    <div class="cal-header">
+      <div class="cal-title-block">
+        <div class="cal-week-label" id="schWeekLabel">This Week</div>
+        <div class="cal-range" id="schDateRange"></div>
+      </div>
+      <div class="cal-actions">
+        <button class="cal-btn cal-btn-google" onclick="addAllToGcal()">+ Add to Google Calendar</button>
+        <button class="cal-btn cal-btn-ics" onclick="downloadICS()">↓ Download .ics</button>
+      </div>
+    </div>
+  </div>
   <div class="week-grid" id="weekGrid"></div>
   <div class="info-box">
     <div class="info-box-title" style="color:var(--teal)">Fungal Acne Protocol</div>
@@ -529,14 +562,85 @@ function renderHistory(){
 
 // ── SCHEDULE ──────────────────────────────────────────────────────────────
 function renderSchedule(){
-  const sched=[{d:'Mon',pm:'regular'},{d:'Tue',pm:'bha'},{d:'Wed',pm:'regular'},{d:'Thu',pm:'bha'},{d:'Fri',pm:'regular'},{d:'Sat',pm:'bha'},{d:'Sun',pm:'regular'}];
-  const today3=DAYS[dayIdx].slice(0,3);
-  document.getElementById('weekGrid').innerHTML=sched.map(r=>`
-    <div class="week-row ${r.d===today3?'today':''}">
-      <span class="week-day">${r.d}</span>
-      <div class="week-item"><div class="week-dot" style="background:#D4900A"></div>Full AM Routine</div>
-      <div class="week-item"><div class="week-dot" style="background:${r.pm==='bha'?'#C2456A':'#7B5EA7'}"></div>${r.pm==='bha'?'BHA Night':'Regular Night'}</div>
-    </div>`).join('');
+  // Build Mon-Sun of the current week
+  const mon=new Date(today);
+  const diff=dayIdx===0?-6:1-dayIdx;
+  mon.setDate(today.getDate()+diff);
+
+  // Week label
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  document.getElementById('schWeekLabel').textContent='Week of '+mon.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  document.getElementById('schDateRange').textContent=mon.toLocaleDateString('en-US',{month:'long',day:'numeric'})+' — '+sun.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+  const BHA_DAYS=[2,4,6]; // Tue, Thu, Sat (getDay)
+  const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  // Reorder Mon-Sun
+  const ORDER=[1,2,3,4,5,6,0];
+
+  const grid=document.getElementById('weekGrid');
+  grid.innerHTML=ORDER.map(d=>{
+    const date=new Date(mon);
+    date.setDate(mon.getDate()+(d===0?6:d-1));
+    const isToday=date.toISOString().split('T')[0]===todayStr;
+    const isBHADay=BHA_DAYS.includes(d);
+    const dayName=dayNames[d];
+    const dateNum=date.getDate();
+    const tasks=[];
+    tasks.push({label:'AM Routine',cls:'mt-am'});
+    tasks.push({label:'Nizoral — forehead',cls:'mt-fungal'});
+    tasks.push({label:isBHADay?'BHA Night':'Regular Night',cls:isBHADay?'mt-bha':''});
+    if(!isBHADay) tasks.push({label:'Pillowcase change',cls:'mt-fungal'});
+    return `<div class="day-col${isToday?' today':''}">
+      <div class="day-head">
+        ${dayName}<span class="day-date">${dateNum}</span>${isToday?'<div class="today-dot"></div>':''}
+      </div>
+      <div class="mini-tasks">
+        ${tasks.map(t=>`<div class="mt ${t.cls}"><div class="mt-dot"></div>${t.label}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── GOOGLE CALENDAR ────────────────────────────────────────────────────────
+function gcalUrl(title,dateStr,timeStart,timeEnd,description){
+  // dateStr = 'YYYYMMDD', timeStart/End = 'HHMMSS'
+  const start=dateStr+'T'+timeStart;
+  const end=dateStr+'T'+timeEnd;
+  const params=new URLSearchParams({action:'TEMPLATE',text:title,dates:`${start}/${end}`,details:description,recur:'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU'});
+  return `https://calendar.google.com/calendar/render?${params}`;
+}
+
+function addAllToGcal(){
+  const ds=todayStr.replace(/-/g,'');
+  const amDesc='Skin Reset AM Routine:\n1. Shu Uemura Cleansing Oil\n2. La Roche-Posay Cleanser\n3. HA Serum\n4. Niacinamide 10%\n5. Azelaic Acid 10%\n6. Stratia Liquid Gold\n7. Black Girl Sunscreen SPF 45';
+  const pmDesc='Skin Reset PM Routine:\n1. Shu Uemura Cleansing Oil\n2. La Roche-Posay Cleanser\n3. Nizoral (forehead, 3-5 min)\n4. HA Serum\n5. Niacinamide\n6. COSRX Snail Mucin\n7. Dr. Jart Cicapair (cheeks)\n8. Stratia Liquid Gold\n\nBHA nights (Tue/Thu/Sat): replace steps 4-8 with Paula\'s Choice BHA + 20min wait + Squalane';
+  // Open AM first, then PM with a delay so both windows open
+  window.open(gcalUrl('🌅 Skin Reset — Morning Routine',ds,'070000','071500',amDesc),'_blank');
+  setTimeout(()=>window.open(gcalUrl('🌙 Skin Reset — Evening Routine',ds,'210000','211500',pmDesc),'_blank'),600);
+}
+
+// ── ICS DOWNLOAD ───────────────────────────────────────────────────────────
+function downloadICS(){
+  const uid=()=>Math.random().toString(36).slice(2)+'@skinreset';
+  const fmt=d=>d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const now=new Date();
+  // AM event — daily recurring 7:00 AM
+  const amStart=new Date(today);amStart.setHours(7,0,0,0);
+  const amEnd=new Date(today);amEnd.setHours(7,15,0,0);
+  // PM event — daily recurring 9:00 PM
+  const pmStart=new Date(today);pmStart.setHours(21,0,0,0);
+  const pmEnd=new Date(today);pmEnd.setHours(21,15,0,0);
+
+  const amDesc='1. Shu Uemura Cleansing Oil\\n2. La Roche-Posay Cleanser\\n3. HA Serum\\n4. Niacinamide 10%\\n5. Azelaic Acid 10%\\n6. Stratia Liquid Gold\\n7. Black Girl Sunscreen SPF 45';
+  const pmDesc='1. Shu Uemura Cleansing Oil\\n2. La Roche-Posay Cleanser\\n3. Nizoral forehead 3-5 min\\n4. HA Serum\\n5. Niacinamide\\n6. COSRX Snail Mucin\\n7. Dr. Jart Cicapair cheeks\\n8. Stratia Liquid Gold\\n\\nBHA nights Tue/Thu/Sat: use Paula Choice BHA instead of steps 4-8';
+
+  const ics=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Skin Reset Protocol//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nBEGIN:VEVENT\r\nUID:${uid()}\r\nDTSTAMP:${fmt(now)}\r\nDTSTART:${fmt(amStart)}\r\nDTEND:${fmt(amEnd)}\r\nSUMMARY:🌅 Skin Reset — Morning Routine\r\nDESCRIPTION:${amDesc}\r\nRRULE:FREQ=DAILY\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:${uid()}\r\nDTSTAMP:${fmt(now)}\r\nDTSTART:${fmt(pmStart)}\r\nDTEND:${fmt(pmEnd)}\r\nSUMMARY:🌙 Skin Reset — Evening Routine\r\nDESCRIPTION:${pmDesc}\r\nRRULE:FREQ=DAILY\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+
+  const blob=new Blob([ics],{type:'text/calendar'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='skin-reset-routine.ics';
+  a.click();
 }
 
 // ── TAB SWITCH ────────────────────────────────────────────────────────────
